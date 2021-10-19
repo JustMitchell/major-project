@@ -7,10 +7,10 @@ A platformer type game
 - A player
 - Obstacles 
 - Platforms
-- Multiple Levels
+- Sound/Music
 
 ## Nice to Have List
 
 - Charcter Animations
-- Sound/Music
 - Tile Screen
+- Multiple Levels

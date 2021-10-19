@@ -2,34 +2,38 @@
 
 let player;
 let isJumping = false;
-let diameter = 20;
+let playerSize = 20;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  player = new Player(width/2, height - diameter, 20);
+  player = new Player(width/2, height - playerSize, playerSize);
 }
 
 function draw() {
   background(220);
   player.display();
   player.movement();
+  player.keyPressed();
 }
 
 class Player {
-  constructor (x, y, diameter) {
+  constructor (x, y, playerSize) {
     this.x = x;
     this.y = y;
-    this.diameter = diameter;
+    this.playerSize = playerSize;
     this.speedY = 1;
     this.speedX = 5;
     this.color = "red";
     this.gravity = 0.2;
     this.isJumping = false;
+    this.acceleration = 0.3;
   }
+
   display() {
     fill("red");
-    rect(this.x, this.y, this.diameter, this.diameter);
+    rect(this.x, this.y, this.playerSize, this.playerSize);
   }
+
   movement() {
     if (keyIsDown(68)) { //d
       this.x += this.speedX;
@@ -44,8 +48,9 @@ class Player {
     if (this.x < 0) {
       this.x = windowWidth;
     }
-    // jumping
-    if (this.y === height - this.diameter) {
+  
+    //jumping
+    if (this.y === height - this.playerSize) {
       this.gravity = 0;
       this.isJumping = false;
     } 
@@ -53,8 +58,8 @@ class Player {
       this.gravity = 0.2;
     }
   
-    if (this.y > height - this.diameter) {
-      this.y = height - this.diameter;
+    if (this.y > height - this.playerSize) {
+      this.y = height - this.playerSize;
       this.speedY = 0;
     } 
     else {
@@ -62,13 +67,28 @@ class Player {
       this.speedY += this.gravity;
     }
   }
+
   keyPressed() {
     if (this.isJumping === false) {
       if (keyCode === 32) {
         this.isJumping = true;
-        console.log(this.isJumping);
+        console.log(isJumping);
         this.speedY = -5;
       }
     }
+  }
+}
+
+class Platform {
+  constructor (x, y, width, height) {
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.color = "blue";
+  }
+  display() {
+    fill(this.color);
+    rect(this.x, this.y, this.width, this.height);
   }
 }
