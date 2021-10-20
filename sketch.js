@@ -1,12 +1,13 @@
 // Platformer
 
-let player;
+let player, platform1;
 let isJumping = false;
 let playerSize = 20;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   player = new Player(width/2, height - playerSize, playerSize);
+  platform1 = new Platform(width / 4, height - 50, 100, 5);
 }
 
 function draw() {
@@ -14,6 +15,7 @@ function draw() {
   player.display();
   player.movement();
   player.keyPressed();
+  platform1.display();
 }
 
 class Player {
