@@ -1,21 +1,47 @@
 // Platformer
 
+let Engine = Matter.Engine;
+let World = Matter.World;
+let Bodies = Matter.Bodies;
+
+const drawbody = Helpers.drawbody;
+
+let world;
+let engine;
 let player, platform1;
 let isJumping = false;
 let playerSize = 20;
+let platform, ground;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  engine = Engine.create();
+  world = engine.world;
+  platform = Bodies.rectangle(width / 4, height-50, 100, 5, {
+    isStatic: true
+  });
+  
+
   player = new Player(width/2, height - playerSize, playerSize);
-  platform1 = new Platform(width / 4, height - 50, 100, 5);
+  // platform1 = new Platform(width / 4, height - 50, 100, 5);
+
+  Engine.run(engine);
+ 
+  World.add(world, platform);
+
+  
 }
 
 function draw() {
-  background(220);
+  background(0);
   player.display();
   player.movement();
   player.keyPressed();
-  platform1.display();
+  // platform1.display();
+
+  fill(255);
+  rect(platform.position.x, platform.position.y, 100, 5);
+
 }
 
 class Player {
@@ -91,6 +117,6 @@ class Platform {
   }
   display() {
     fill(this.color);
-    rect(this.x, this.y, this.width, this.height);
+    Bodies.rectangle(this.x, this.y, this.width, this.height);
   }
 }
