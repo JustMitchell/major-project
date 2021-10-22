@@ -3,8 +3,9 @@
 let Engine = Matter.Engine;
 let World = Matter.World;
 let Bodies = Matter.Bodies;
+let Body = Matter.Body;
 
-// const drawbody = Helpers.drawbody;
+
 
 let world;
 let engine;
@@ -18,32 +19,27 @@ function setup() {
   world = engine.world;
 
   platform1 = new Platform(width / 4, height - 50, 100, 5);
-  ground = Bodies.rectangle(width / 2, height - 3, width, 10, {isStatic: true});
+  ground = new Platform(width / 2, height - 3, width, 10);
   player = new Player(width/2, height - 50, 20);
  
   Engine.run(engine);
  
   World.add(world, ground);
   
-  
 }
 
 function draw() {
   background(0);
   platform1.display();
-  // ground.display();
+  ground.display();
   player.movement();
   player.display();
   
-  stroke(255);
-  fill("blue");
-  strokeWeight(4);
-  rectMode(CENTER);
-  rect(width / 2, height - 3, width, 10);
-  
-
 }
 
+function keyPressed() {
+  player.spacePressed();
+}
 // class Player {
 //   constructor (x, y, playerSize) {
 //     this.x = x;
@@ -109,6 +105,9 @@ function draw() {
 class Player {
   constructor (x, y, size) {
     this.body = Bodies.rectangle(x, y, size, size);
+    this.body.friction = 0.5;
+    this.body.restitution = 0;
+    this.body.frictionAir = 0.1;
     this.size = size;
     this.color = "red";
     this.x = x;
@@ -119,7 +118,6 @@ class Player {
   display () {
     let pos = this.body.position;
 
-    strokeWeight(1);
     push();
     translate(pos.x, pos.y);
     fill(this.color);
@@ -129,10 +127,24 @@ class Player {
   }
   movement () {
     if (keyIsDown(68)) { //d
-      this.x += this.speedX;
+      Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:0.001, y:0});
     }
-    if (keyIsDown(65)) { // a
-      this.x -= this.speedX;
+    else if (keyIsDown(65)) { // a
+      Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:-0.001, y:0});
+    }
+
+    if (this.x > windowWidth) {
+      this.body.position.x = 0;
+    }
+    if (this.x < 0) {
+      this.body.position = windowWidth;
+    }
+  }
+  spacePressed() {
+    
+    if (keyCode === 32) {
+      Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:0, y:-0.02});
+      console.log(this.body.position.y);
     }
   }
 }
@@ -143,6 +155,8 @@ class Platform {
     this.body = Bodies.rectangle(x, y, width, height, {
       isStatic: true
     });
+    this.body.friction = 0.5;
+    this.body.restitution = 0;
     this.w = width;
     this.h = height;
     this.color = "white";
@@ -158,5 +172,11 @@ class Platform {
     rectMode(CENTER);
     rect(0, 0, this.w, this.h);
     pop();
+  }
+}
+
+class Spike {
+  constructor (x, y, sides) {
+    this.body = Bodies.polygon
   }
 }
