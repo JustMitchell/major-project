@@ -1,15 +1,16 @@
 // Platformer
+Matter.Common.setDecomp("poly-decomp.js");
 
 let Engine = Matter.Engine;
 let World = Matter.World;
 let Bodies = Matter.Bodies;
 let Body = Matter.Body;
 
-
+// let decomp = require("poly-decomp");
 
 let world;
 let engine;
-let player, platform1, ground;
+let player, platform1, ground, spike1;
 let isJumping = false;
 let playerSize = 20;
 
@@ -17,10 +18,11 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   engine = Engine.create();
   world = engine.world;
-
+  
   platform1 = new Platform(width / 4, height - 50, 100, 5);
   ground = new Platform(width / 2, height - 3, width, 10);
   player = new Player(width/2, height - 50, 20);
+  spike1 = new Spike(width / 4, height - 50, 40, 20);
  
   Engine.run(engine);
  
@@ -152,9 +154,7 @@ class Player {
 
 class Platform {
   constructor (x, y, width, height) {
-    this.body = Bodies.rectangle(x, y, width, height, {
-      isStatic: true
-    });
+    this.body = Bodies.rectangle(x, y, width, height, {isStatic: true});
     this.body.friction = 0.5;
     this.body.restitution = 0;
     this.w = width;
@@ -176,7 +176,22 @@ class Platform {
 }
 
 class Spike {
-  constructor (x, y, sides) {
-    this.body = Bodies.polygon
+  constructor (x, y, width, height) {
+    this.sides = 3;
+    this.body = Bodies.fromVertices(x, y, [{x: x+width/2, y: y-height}, {x: x+width, y: y}], {isStatic: true});
+    this.color = "purple";
+    this.width = width;
+    this.height = height;
+    World.add(world, this.body);
+  }
+  display() {
+
+    let pos = this.body.position;
+
+    push();
+    translate(pos.x, pos.y);
+    fill(this.color);
+    triangle(0, 0, 0+width/2, 0-height, 0+width, 0);
+    pop();
   }
 }
