@@ -1,5 +1,5 @@
 // Platformer
-Matter.Common.setDecomp("poly-decomp.js");
+// Matter.Common.setDecomp("poly-decomp.js");
 
 let Engine = Matter.Engine;
 let World = Matter.World;
@@ -11,7 +11,6 @@ let Body = Matter.Body;
 let world;
 let engine;
 let player, platform1, ground, spike1;
-let isJumping = false;
 let playerSize = 20;
 
 function setup() {
@@ -20,9 +19,9 @@ function setup() {
   world = engine.world;
   
   platform1 = new Platform(width / 4, height - 50, 100, 5);
-  ground = new Platform(width / 2, height - 3, width, 10);
-  player = new Player(width/2, height - 50, 20);
-  spike1 = new Spike(width / 4, height - 50, 40, 20);
+  ground = new Platform(width / 2, height - 3, width*2, 10);
+  player = new Player(width/2, height - 20, 20);
+  spike1 = new Spike(width / 4, height - 50, 30, 20);
  
   Engine.run(engine);
  
@@ -36,6 +35,8 @@ function draw() {
   ground.display();
   player.movement();
   player.display();
+  spike1.display();
+  spike1.killPlayer();
   
 }
 
@@ -111,19 +112,22 @@ class Player {
     this.body.restitution = 0;
     this.body.frictionAir = 0.1;
     this.size = size;
-    this.color = "red";
+    this.color = "green";
     this.x = x;
     this.y = y;
     this.speedX = 2;
+    this.isJumping = false;
     World.add(world, this.body);
   }
   display () {
     let pos = this.body.position;
+    let angle = this.body.angle;
 
     push();
     translate(pos.x, pos.y);
     fill(this.color);
     rectMode(CENTER);
+    rotate(angle);
     rect(0, 0, this.size, this.size);
     pop();
   }
@@ -135,18 +139,23 @@ class Player {
       Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:-0.001, y:0});
     }
 
-    if (this.x > windowWidth) {
+    if (this.body.position.x > windowWidth) {
       this.body.position.x = 0;
     }
-    if (this.x < 0) {
-      this.body.position = windowWidth;
+    if (this.body.position.x < 0) {
+      this.body.position.x = windowWidth;
+    }
+    if (this.y === windowHeight - this.playerSize) {
+      this.isJumping = false;
     }
   }
   spacePressed() {
-    
-    if (keyCode === 32) {
-      Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:0, y:-0.02});
-      console.log(this.body.position.y);
+    if (this.isJumping === false) {
+
+      if (keyCode === 32) {
+        this.isJumping = true;
+        Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:0, y:-0.02});
+      }
     }
   }
 }
@@ -182,6 +191,9 @@ class Spike {
     this.color = "purple";
     this.width = width;
     this.height = height;
+    this.x = x;
+    this.y = y;
+    this.hit = false;
     World.add(world, this.body);
   }
   display() {
@@ -191,7 +203,12 @@ class Spike {
     push();
     translate(pos.x, pos.y);
     fill(this.color);
-    triangle(0, 0, 0+width/2, 0-height, 0+width, 0);
+    triangle(0, 0, 0+this.width/2, 0-this.height, 0+this.width, 0);
     pop();
+  }
+  killPlayer() {
+    this.hit = collidePointRect(player.x, player.y, player.size, 0+this.width/2, 0-this.height);
+    stroke(this.hit ? color("red") : 0);
+    print("colliding?", this.hit);
   }
 }
