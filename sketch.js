@@ -20,7 +20,7 @@ function setup() {
   
   platform1 = new Platform(width / 4, height - 50, 100, 5);
   ground = new Platform(width / 2, height - 3, width*2, 10);
-  player = new Player(width/2, height - 20, 20);
+  player = new Player(width/2, height - 20, 15);
   spike1 = new Spike(width / 4, height - 50, 30, 20);
  
   Engine.run(engine);
@@ -36,87 +36,26 @@ function draw() {
   player.movement();
   player.display();
   spike1.display();
-  spike1.killPlayer();
-  
+  // spike1.killPlayer();
+  // console.log(player.body.force);
 }
 
 function keyPressed() {
   player.spacePressed();
 }
-// class Player {
-//   constructor (x, y, playerSize) {
-//     this.x = x;
-//     this.y = y;
-//     this.playerSize = playerSize;
-//     this.speedY = 1;
-//     this.speedX = 5;
-//     this.color = "red";
-//     this.gravity = 0.2;
-//     this.isJumping = false;
-//     this.acceleration = 0.3;
-//   }
 
-//   display() {
-//     fill("red");
-//     rect(this.x, this.y, this.playerSize, this.playerSize);
-//   }
-
-//   movement() {
-//     if (keyIsDown(68)) { //d
-//       this.x += this.speedX;
-//     }
-//     if (keyIsDown(65)) { // a
-//       this.x -= this.speedX;
-//     }
-//     // tp player to other size when they go off screen
-//     if (this.x > windowWidth) {
-//       this.x = 0;
-//     }
-//     if (this.x < 0) {
-//       this.x = windowWidth;
-//     }
-  
-//     //jumping
-//     if (this.y === height - this.playerSize) {
-//       this.gravity = 0;
-//       this.isJumping = false;
-//     } 
-//     else {
-//       this.gravity = 0.2;
-//     }
-  
-//     if (this.y > height - this.playerSize) {
-//       this.y = height - this.playerSize;
-//       this.speedY = 0;
-//     } 
-//     else {
-//       this.y += this.speedY;
-//       this.speedY += this.gravity;
-//     }
-//   }
-
-//   keyPressed() {
-//     if (this.isJumping === false) {
-//       if (keyCode === 32) {
-//         this.isJumping = true;
-//         console.log(isJumping);
-//         this.speedY = -5;
-//       }
-//     }
-//   }
-// }
 class Player {
   constructor (x, y, size) {
-    this.body = Bodies.rectangle(x, y, size, size);
-    this.body.friction = 0.5;
+    this.body = Bodies.circle(x, y, size);
+    // this.body.friction = 0.5;
     this.body.restitution = 0;
-    this.body.frictionAir = 0.1;
     this.size = size;
     this.color = "green";
     this.x = x;
     this.y = y;
     this.speedX = 2;
     this.isJumping = false;
+    this.hit = false;
     World.add(world, this.body);
   }
   display () {
@@ -126,9 +65,8 @@ class Player {
     push();
     translate(pos.x, pos.y);
     fill(this.color);
-    rectMode(CENTER);
     rotate(angle);
-    rect(0, 0, this.size, this.size);
+    circle(0, 0, this.size*2);
     pop();
   }
   movement () {
@@ -138,14 +76,11 @@ class Player {
     else if (keyIsDown(65)) { // a
       Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:-0.001, y:0});
     }
-
-    if (this.body.position.x > windowWidth) {
-      this.body.position.x = 0;
-    }
-    if (this.body.position.x < 0) {
-      this.body.position.x = windowWidth;
-    }
-    if (this.y === windowHeight - this.playerSize) {
+    // console.log(this.body.position.y, height - this.size - 10);
+    
+    // let collision = Matter.SAT.collides(this.body, ground);
+    if (this.body.position.y >= height - this.size - 10) {
+    // if (collision.collided) {
       this.isJumping = false;
     }
   }
@@ -160,11 +95,10 @@ class Player {
   }
 }
 
-
 class Platform {
   constructor (x, y, width, height) {
     this.body = Bodies.rectangle(x, y, width, height, {isStatic: true});
-    this.body.friction = 0.5;
+    this.body.friction = 0.3;
     this.body.restitution = 0;
     this.w = width;
     this.h = height;
@@ -206,9 +140,9 @@ class Spike {
     triangle(0, 0, 0+this.width/2, 0-this.height, 0+this.width, 0);
     pop();
   }
-  killPlayer() {
-    this.hit = collidePointRect(player.x, player.y, player.size, 0+this.width/2, 0-this.height);
-    stroke(this.hit ? color("red") : 0);
-    print("colliding?", this.hit);
-  }
+  // killPlayer() {
+  //   this.hit = collidePointRect(player.x, player.y, player.size, 0+this.width/2, 0-this.height);
+  //   stroke(this.hit ? color("red") : 0);
+  //   // print("colliding?", this.hit);
+  // }
 }
