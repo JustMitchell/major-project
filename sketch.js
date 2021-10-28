@@ -10,7 +10,7 @@ let Body = Matter.Body;
 
 let world;
 let engine;
-let player, platform1, ground, spike1;
+let player, platform1, platform2, ground, obstacle1;
 let playerSize = 20;
 
 function setup() {
@@ -19,9 +19,10 @@ function setup() {
   world = engine.world;
   
   platform1 = new Platform(width / 4, height - 50, 100, 5);
+  platform2 = new Platform(width / 2, height - 100, 100, 5);
   ground = new Platform(width / 2, height - 3, width*2, 10);
   player = new Player(width/2, height - 20, 15);
-  spike1 = new Spike(width / 4, height - 50, 30, 20);
+  obstacle1 = new Obstacle(width / 4, height - 60, 20, 20);
  
   Engine.run(engine);
  
@@ -32,11 +33,12 @@ function setup() {
 function draw() {
   background(0);
   platform1.display();
+  platform2.display();
   ground.display();
   player.movement();
   player.display();
-  spike1.display();
-  // spike1.killPlayer();
+  obstacle1.display();
+  // obstacle1.killPlayer();
   // console.log(player.body.force);
 }
 
@@ -78,19 +80,30 @@ class Player {
     }
     // console.log(this.body.position.y, height - this.size - 10);
     
-    // let collision = Matter.SAT.collides(this.body, ground);
-    if (this.body.position.y >= height - this.size - 10) {
-    // if (collision.collided) {
+    let collision = Matter.SAT.collides(this.body, ground.body).collided;
+    if(Matter.SAT.collides(this.body, platform1.body).collided || Matter.SAT.collides(this.body, platform2.body).collided) {
+      collision = true;
+    }
+    console.log(collision);
+    // if (this.body.position.y >= height - this.size - 10) {
+    if (collision === true) {
       this.isJumping = false;
     }
   }
   spacePressed() {
     if (this.isJumping === false) {
-
       if (keyCode === 32) {
         this.isJumping = true;
         Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:0, y:-0.02});
       }
+    }
+  }
+  hitObstacle() {
+    let obstCollision = Matter.SAT.collides(this.body, obstacle1.body).collided;
+
+    if (obstCollision === true) {
+      this.body.position.x = width/2;
+      this.body.position.y = height - 20;
     }
   }
 }
@@ -118,10 +131,9 @@ class Platform {
   }
 }
 
-class Spike {
+class Obstacle {
   constructor (x, y, width, height) {
-    this.sides = 3;
-    this.body = Bodies.fromVertices(x, y, [{x: x+width/2, y: y-height}, {x: x+width, y: y}], {isStatic: true});
+    this.body = Bodies.rectangle(x,y,width,height, {isStatic: true});
     this.color = "purple";
     this.width = width;
     this.height = height;
@@ -137,12 +149,8 @@ class Spike {
     push();
     translate(pos.x, pos.y);
     fill(this.color);
-    triangle(0, 0, 0+this.width/2, 0-this.height, 0+this.width, 0);
+    rectMode(CENTER);
+    rect(0, 0, this.width, this.height);
     pop();
   }
-  // killPlayer() {
-  //   this.hit = collidePointRect(player.x, player.y, player.size, 0+this.width/2, 0-this.height);
-  //   stroke(this.hit ? color("red") : 0);
-  //   // print("colliding?", this.hit);
-  // }
 }
