@@ -1,33 +1,33 @@
 // Platformer
-// Matter.Common.setDecomp("poly-decomp.js");
 
 let Engine = Matter.Engine;
 let World = Matter.World;
 let Bodies = Matter.Bodies;
 let Body = Matter.Body;
 
-// let decomp = require("poly-decomp");
 
 let world;
 let engine;
-let player, platform1, platform2, ground, obstacle1;
+let player, platform1, platform2, ground, obstacle1, block1;
 let playerSize = 20;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+  
+  // creating matter.js environment
   engine = Engine.create();
   world = engine.world;
-  
+ 
+  // creating objects
   platform1 = new Platform(width / 4, height - 50, 100, 5);
-  platform2 = new Platform(width / 2, height - 100, 100, 5);
+  platform2 = new Platform(width / 1.5, height - 140, 100, 5);
   ground = new Platform(width / 2, height - 3, width*2, 10);
   player = new Player(width/2, height - 20, 15);
   obstacle1 = new Obstacle(width / 4, height - 60, 20, 20);
+  block1 = new Block(width / 7, height - 100, 30);
  
   Engine.run(engine);
- 
-  World.add(world, ground);
-  
+  engine.world.gravity.y = 1;
 }
 
 function draw() {
@@ -37,9 +37,9 @@ function draw() {
   ground.display();
   player.movement();
   player.display();
+  player.hitObstacle();
   obstacle1.display();
-  // obstacle1.killPlayer();
-  // console.log(player.body.force);
+  block1.display();
 }
 
 function keyPressed() {
@@ -49,8 +49,8 @@ function keyPressed() {
 class Player {
   constructor (x, y, size) {
     this.body = Bodies.circle(x, y, size);
-    // this.body.friction = 0.5;
-    this.body.restitution = 0;
+    this.body.restitution = 0.5;
+    this.body.friction = 0.5;
     this.size = size;
     this.color = "green";
     this.x = x;
@@ -63,7 +63,7 @@ class Player {
   display () {
     let pos = this.body.position;
     let angle = this.body.angle;
-
+    // syncing p5.js shapes to matter.js
     push();
     translate(pos.x, pos.y);
     fill(this.color);
@@ -78,14 +78,13 @@ class Player {
     else if (keyIsDown(65)) { // a
       Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:-0.001, y:0});
     }
-    // console.log(this.body.position.y, height - this.size - 10);
     
+    // jumping 
     let collision = Matter.SAT.collides(this.body, ground.body).collided;
-    if(Matter.SAT.collides(this.body, platform1.body).collided || Matter.SAT.collides(this.body, platform2.body).collided) {
+    if(Matter.SAT.collides(this.body, platform1.body).collided || Matter.SAT.collides(this.body, platform2.body).collided || Matter.SAT.collides(this.body, block1.body).collided) {
       collision = true;
     }
-    console.log(collision);
-    // if (this.body.position.y >= height - this.size - 10) {
+  
     if (collision === true) {
       this.isJumping = false;
     }
@@ -100,10 +99,10 @@ class Player {
   }
   hitObstacle() {
     let obstCollision = Matter.SAT.collides(this.body, obstacle1.body).collided;
-
+  
+    // die if obstacle hit
     if (obstCollision === true) {
-      this.body.position.x = width/2;
-      this.body.position.y = height - 20;
+      Body.set(this.body, "position", {x: width/2, y: height - 20});
     }
   }
 }
@@ -121,7 +120,7 @@ class Platform {
   display() {
     
     let pos = this.body.position;
-  
+    // syncing p5.js shapes to matter.js
     push();
     translate(pos.x, pos.y);
     fill(this.color);
@@ -145,12 +144,35 @@ class Obstacle {
   display() {
 
     let pos = this.body.position;
-
+    // syncing p5.js shapes to matter.js
     push();
     translate(pos.x, pos.y);
     fill(this.color);
     rectMode(CENTER);
     rect(0, 0, this.width, this.height);
+    pop();
+  }
+}
+
+class Block {
+  constructor (x, y, size) {
+    this.body = Bodies.rectangle(x, y, size, size);
+    this.body.friction = 0.01;
+    this.color = "brown";
+    this.size = size;
+    World.add(world, this.body);
+  }
+  display () {
+
+    let pos = this.body.position;
+    let angle = this.body.angle;
+    // syncing p5.js shapes to matter.js
+    push();
+    translate(pos.x, pos.y);
+    fill(this.color);
+    rectMode(CENTER);
+    rotate(angle);
+    rect(0, 0, this.size, this.size);
     pop();
   }
 }
