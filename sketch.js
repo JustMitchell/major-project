@@ -6,10 +6,16 @@ let Bodies = Matter.Bodies;
 let Body = Matter.Body;
 
 
-let world;
-let engine;
-let player, platform1, platform2, ground, obstacle1, block1;
+let world, engine, player, platform1, platform2, platform3, ground, obstacle1, block1, jumpSound, hitSound, musicButton, backgroundMusic;
 let playerSize = 20;
+let isMusicPlaying = false;
+let theBodies = [];
+
+function preload () {
+  jumpSound = loadSound("assets/Jump.wav");
+  hitSound = loadSound("assets/hit.wav");
+  backgroundMusic = loadSound("assets/Music.wav");
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -20,26 +26,33 @@ function setup() {
  
   // creating objects
   platform1 = new Platform(width / 4, height - 50, 100, 5);
+  theBodies.push(platform1);
   platform2 = new Platform(width / 1.5, height - 140, 100, 5);
+  theBodies.push(platform2);
+  platform3 = new Platform(width / 7, height - 400, 100, 5);
+  theBodies.push(platform3);
   ground = new Platform(width / 2, height - 3, width*2, 10);
+  theBodies.push(ground);
   player = new Player(width/2, height - 20, 15);
   obstacle1 = new Obstacle(width / 4, height - 60, 20, 20);
   block1 = new Block(width / 7, height - 100, 30);
+  theBodies.push(block1);
+  musicButton = new Button (0, 0, width / 10, height / 20);
  
   Engine.run(engine);
-  engine.world.gravity.y = 1;
+
 }
 
 function draw() {
   background(0);
-  platform1.display();
-  platform2.display();
-  ground.display();
   player.movement();
   player.display();
   player.hitObstacle();
   obstacle1.display();
-  block1.display();
+  musicButton.display();
+  for (let someBody of theBodies) {
+    someBody.display();
+  }
 }
 
 function keyPressed() {
@@ -61,8 +74,10 @@ class Player {
     World.add(world, this.body);
   }
   display () {
+
     let pos = this.body.position;
     let angle = this.body.angle;
+
     // syncing p5.js shapes to matter.js
     push();
     translate(pos.x, pos.y);
@@ -80,19 +95,21 @@ class Player {
     }
     
     // jumping 
-    let collision = Matter.SAT.collides(this.body, ground.body).collided;
-    if(Matter.SAT.collides(this.body, platform1.body).collided || Matter.SAT.collides(this.body, platform2.body).collided || Matter.SAT.collides(this.body, block1.body).collided) {
-      collision = true;
-    }
-  
-    if (collision === true) {
-      this.isJumping = false;
+    let collision = false;
+    for (let someBody of theBodies) {
+      if (Matter.SAT.collides(this.body, someBody.body).collided) {
+        collision = true;
+      }
+      if (collision === true) {
+        this.isJumping = false;
+      }
     }
   }
   spacePressed() {
     if (this.isJumping === false) {
       if (keyCode === 32) {
         this.isJumping = true;
+        jumpSound.play();
         Body.applyForce(this.body, {x:this.body.position.x, y:this.body.position.y}, {x:0, y:-0.02});
       }
     }
@@ -102,7 +119,9 @@ class Player {
   
     // die if obstacle hit
     if (obstCollision === true) {
+      hitSound.play();
       Body.set(this.body, "position", {x: width/2, y: height - 20});
+      Body.set(block1.body, "position", {x: width/7, y: height - 100});
     }
   }
 }
@@ -116,10 +135,12 @@ class Platform {
     this.h = height;
     this.color = "white";
     World.add(world, this.body);
+
   }
   display() {
-    
+
     let pos = this.body.position;
+
     // syncing p5.js shapes to matter.js
     push();
     translate(pos.x, pos.y);
@@ -144,6 +165,7 @@ class Obstacle {
   display() {
 
     let pos = this.body.position;
+
     // syncing p5.js shapes to matter.js
     push();
     translate(pos.x, pos.y);
@@ -174,5 +196,45 @@ class Block {
     rotate(angle);
     rect(0, 0, this.size, this.size);
     pop();
+  }
+}
+
+class Button {
+  constructor(x, y, w, h) {
+    this.x = x;
+    this.y = y;
+    this.width = w;
+    this.height = h;
+    this.hoverColor = "#dccfec";
+    this.notHoveredColor = "#4f517d";
+  }
+
+  display() {
+    if (this.checkIfInside(mouseX, mouseY)) {
+      fill(this.hoverColor);
+    }
+    else {
+      fill(this.notHoveredColor);
+    }
+    rect(this.x, this.y, this.width, this.height);
+    textSize(20);
+    fill("white");
+    text("Music!", this.x + 2, this.y + 25);
+  }
+
+  checkIfInside(x, y) {
+    return x >= this.x && x <= this.x + this.width && y >= this.y && y <= this.y + this.height;
+  }
+}
+
+function mousePressed() {
+  if (musicButton.checkIfInside(mouseX, mouseY)) {
+    isMusicPlaying =  !isMusicPlaying;
+  }
+  if (isMusicPlaying === true) {
+    backgroundMusic.loop();
+  }
+  else {
+    backgroundMusic.pause();
   }
 }
