@@ -6,7 +6,7 @@ let Bodies = Matter.Bodies;
 let Body = Matter.Body;
 
 
-let world, engine, player, platform1, platform2, platform3, ground, obstacle1, block1, jumpSound, hitSound, musicButton, backgroundMusic;
+let world, engine, player, platform1, platform2, platform3, platform4, ground, obstacle1, block1, jumpSound, hitSound, musicButton, backgroundMusic;
 let playerSize = 20;
 let isMusicPlaying = false;
 let theBodies = [];
@@ -29,8 +29,10 @@ function setup() {
   theBodies.push(platform1);
   platform2 = new Platform(width / 1.5, height - 140, 100, 5);
   theBodies.push(platform2);
-  platform3 = new Platform(width / 7, height - 400, 100, 5);
+  platform3 = new Platform(width / 7, height - 350, 100, 5);
   theBodies.push(platform3);
+  platform4 = new Platform(width / 2, height - 250, 60, 5);
+  theBodies.push(platform4);
   ground = new Platform(width / 2, height - 3, width*2, 10);
   theBodies.push(ground);
   player = new Player(width/2, height - 20, 15);
