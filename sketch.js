@@ -37,7 +37,7 @@ function setup() {
   theBodies.push(ground);
   player = new Player(width/2, height - 20, 15);
   obstacle1 = new Obstacle(width / 4, height - 60, 20, 20);
-  block1 = new Block(width / 7, height - 100, 30);
+  block1 = new Block(width / 7, height - 350, 30);
   theBodies.push(block1);
   musicButton = new Button (0, 0, width / 10, height / 20);
  

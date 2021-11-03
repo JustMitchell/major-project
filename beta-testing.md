@@ -8,4 +8,5 @@
 ## Person 2
 -  roll of platform it jumps in air 
 - make moving box noticeable
+- thought obstacle was teleporter
 
