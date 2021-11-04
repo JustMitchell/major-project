@@ -52,6 +52,8 @@ function draw() {
   player.hitObstacle();
   obstacle1.display();
   musicButton.display();
+
+  // displaying objects in array
   for (let someBody of theBodies) {
     someBody.display();
   }
